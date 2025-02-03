@@ -1,0 +1,25 @@
+{
+  "name": "bmusicbot",
+  "version": "1.0.0",
+  "description": "you play bilibili music with this shii",
+  "main": "index.js",
+  "scripts": {
+    "test": "node ./index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ZinerX/bilimusicbot.git"
+  },
+  "author": "ZinerX",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ZinerX/bilimusicbot/issues"
+  },
+  "homepage": "https://github.com/ZinerX/bilimusicbot#readme",
+  "dependencies": {
+    "@discordjs/voice": "^0.18.0",
+    "discord.js": "^14.17.3",
+    "dotenv": "^16.4.7",
+    "ffmpeg-static": "^5.2.0"
+  }
+}
