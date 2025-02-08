@@ -14,7 +14,7 @@ const client = new Client({
     ]
 });
 
-const initMusicFolder = () => {
+const clearOrCreateMusicFolder = () => {
     if (fs.existsSync('./music')) {
         console.log("music folder found, making sure it is empty to prevent wasting space over time...");
         fs.readdir('music', (err, files) => {
@@ -51,7 +51,7 @@ client.once(Events.ClientReady, readyClient => {
 client.on('interactionCreate', async (interaction) => {
     if (!interaction.isChatInputCommand()) return;
 
-    // COMMAND: PLAY
+    // COMMAND: BPLAY
     // FUNCTION: PLAY MUSIC OR ADD MUSIC TO QUEUE IF ALREADY PLAYING
     if (interaction.commandName === "bplay") {
         if (interaction.member.voice.channelId === null) {
@@ -63,11 +63,15 @@ client.on('interactionCreate', async (interaction) => {
         if (input.substring(0, 3) === "BV1") {
             if (queue.length === 0) { // if queue is fresh then init connection and player and subcribe to state changes
                 try {
+                    clearOrCreateMusicFolder();
                     const video_data = await get_video(input); // todo: throw error and catch here if video not found / cannot be downloaded
                     queue.push(input);
-                    console.log("downloaders");
-                    console.log(interaction.member.voice.channelId);
-                    console.log(interaction.guild.id);
+
+                    const sleep = ms => new Promise(r => setTimeout(r, ms));
+                    await sleep(1000);
+                    // console.log("downloaders");
+                    // console.log(interaction.member.voice.channelId);
+                    // console.log(interaction.guild.id);
                     const connection = joinVoiceChannel({
                         channelId: interaction.member.voice.channelId,
                         guildId: interaction.guild.id,
@@ -75,18 +79,16 @@ client.on('interactionCreate', async (interaction) => {
                     });
                     player = createAudioPlayer();
                     var subscription;
-                    connection.on(VoiceConnectionStatus.Ready, (oldState, newState) => {
-                        console.log('Connection is in the Ready state!');
+
+                    connection.on(VoiceConnectionStatus.Ready, () => {
+                        // console.log('Connection is in the Ready state!');
                         subscription = connection.subscribe(player);
-                        const audio_resource = createAudioResource(`./music/${queue[0]}.mp3`, {
-                            metadata: {
-                                title: "amongus",
-                            }
-                        });
+                        let audio_resource = createAudioResource(`./music/${queue[0]}fd.mp3`);
                         player.play(audio_resource);
                         interaction.reply(`Now Playing \`${video_data.title} by ${video_data.owner}\``);
                     });
-                    connection.on(VoiceConnectionStatus.Disconnected, (oldState, newState) => {
+
+                    connection.on(VoiceConnectionStatus.Disconnected, () => {
                         console.log('Connection is Disconnected!');
                         console.log('Stopping the player and clearing the queue');
                         player.stop();
@@ -95,19 +97,17 @@ client.on('interactionCreate', async (interaction) => {
                         queue = [];
                         return;
                     });
-                    console.log(queue.length);
+                    // console.log(queue.length);
+
                     player.on('stateChange', (oldState, newState) => {
                         console.log(`Audio player transitioned from ${oldState.status} to ${newState.status}`);
                     });
+
                     player.on(AudioPlayerStatus.Idle, () => {
-                        console.log("idleidleidleidleidle");
+                        // console.log("idleidleidleidleidle");
                         queue.shift();
                         if (queue.length > 0) {
-                            const audio_resource = createAudioResource(`./music/${queue[0]}.mp3`, {
-                                metadata: {
-                                    title: "amongus",
-                                }
-                            });
+                            var audio_resource = createAudioResource(`./music/${queue[0]}fd.mp3`);
                             player.play(audio_resource);
                         }
                         else {
@@ -156,11 +156,7 @@ client.on('interactionCreate', async (interaction) => {
     if (interaction.commandName === "bskip") {
         queue.shift();
         if (queue.length > 0) {
-            const audio_resource = createAudioResource(`./music/${queue[0]}.mp3`, {
-                metadata: {
-                    title: "amongus",
-                }
-            });
+            var audio_resource = createAudioResource(`./music/${queue[0]}fd.mp3`);
             player.play(audio_resource);
             interaction.reply("Skipped.");
         }
@@ -172,6 +168,5 @@ client.on('interactionCreate', async (interaction) => {
     }
 })
 
-initMusicFolder();
 // Log in to Discord with your client's token
 client.login(process.env.token);
