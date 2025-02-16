@@ -1,9 +1,7 @@
 // Require the necessary discord.js classes
-const { Client, Events, GatewayIntentBits } = require('discord.js');
-const { joinVoiceChannel, createAudioPlayer, AudioPlayerStatus, createAudioResource, VoiceConnectionStatus, getVoiceConnection } = require('@discordjs/voice');
-const { get_video } = require('./get_video.js')
 const fs = require('fs');
 const path = require('path');
+const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 require('dotenv').config();
 
 // Create a new client instance
@@ -13,6 +11,26 @@ const client = new Client({
         GatewayIntentBits.GuildVoiceStates,
     ]
 });
+
+client.commands = new Collection();
+
+const foldersPath = path.join(__dirname, 'commands');
+const commandFolders = fs.readdirSync(foldersPath);
+
+for (const folder of commandFolders) {
+	const commandsPath = path.join(foldersPath, folder);
+	const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+	for (const file of commandFiles) {
+		const filePath = path.join(commandsPath, file);
+		const command = require(filePath);
+		// Set a new item in the Collection with the key as the command name and the value as the exported module
+		if ('data' in command && 'execute' in command) {
+			client.commands.set(command.data.name, command);
+		} else {
+			console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+		}
+	}
+}
 
 const clearOrCreateMusicFolder = () => {
     if (fs.existsSync('./music')) {
@@ -51,121 +69,37 @@ client.once(Events.ClientReady, readyClient => {
 client.on('interactionCreate', async (interaction) => {
     if (!interaction.isChatInputCommand()) return;
 
-    // COMMAND: BPLAY
-    // FUNCTION: PLAY MUSIC OR ADD MUSIC TO QUEUE IF ALREADY PLAYING
-    if (interaction.commandName === "bplay") {
-        if (interaction.member.voice.channelId === null) {
-            interaction.reply("You need to be in a voice channel to use this command!");
-            return;
-        }
-        const input = interaction.options.get('bvid')['value'];
-        console.log(input.substring(0, 3));
-        if (input.substring(0, 3) === "BV1") {
-            if (queue.length === 0) { // if queue is fresh then init connection and player and subcribe to state changes
-                try {
-                    clearOrCreateMusicFolder();
-                    const video_data = await get_video(input); // todo: throw error and catch here if video not found / cannot be downloaded
-                    queue.push(input);
+    // if (interaction.commandName === "bstop") {
+    //     const connection = getVoiceConnection(interaction.guild.id);
+    //     connection.disconnect();
+    //     interaction.reply("Cleared the queue and disconnected the bot!")
+    // }
 
-                    const sleep = ms => new Promise(r => setTimeout(r, ms));
-                    await sleep(1000);
-                    // console.log("downloaders");
-                    // console.log(interaction.member.voice.channelId);
-                    // console.log(interaction.guild.id);
-                    const connection = joinVoiceChannel({
-                        channelId: interaction.member.voice.channelId,
-                        guildId: interaction.guild.id,
-                        adapterCreator: interaction.guild.voiceAdapterCreator,
-                    });
-                    player = createAudioPlayer();
-                    var subscription;
+    // if (interaction.commandName === "bskip") {
+    //     queue.shift();
+    //     if (queue.length > 0) {
+    //         var audio_resource = createAudioResource(`./music/${queue[0]}fd.mp3`);
+    //         player.play(audio_resource);
+    //         interaction.reply("Skipped.");
+    //     }
+    //     else {
+    //         const connection = getVoiceConnection(interaction.guild.id);
+    //         connection.disconnect();
+    //         interaction.reply("Skipped last in the queue, now disconnecting the bot...")
+    //     }
+    // }
 
-                    connection.on(VoiceConnectionStatus.Ready, () => {
-                        // console.log('Connection is in the Ready state!');
-                        subscription = connection.subscribe(player);
-                        let audio_resource = createAudioResource(`./music/${queue[0]}fd.mp3`);
-                        player.play(audio_resource);
-                        interaction.reply(`Now Playing \`${video_data.title} by ${video_data.owner}\``);
-                    });
+    const command = interaction.client.commands.get(interaction.commandName);
+    if (!command) {
+		console.error(`No command matching ${interaction.commandName} was found.`);
+		return;
+	}
 
-                    connection.on(VoiceConnectionStatus.Disconnected, () => {
-                        console.log('Connection is Disconnected!');
-                        console.log('Stopping the player and clearing the queue');
-                        player.stop();
-                        subscription.unsubscribe();
-                        connection.destroy();
-                        queue = [];
-                        return;
-                    });
-                    // console.log(queue.length);
-
-                    player.on('stateChange', (oldState, newState) => {
-                        console.log(`Audio player transitioned from ${oldState.status} to ${newState.status}`);
-                    });
-
-                    player.on(AudioPlayerStatus.Idle, () => {
-                        // console.log("idleidleidleidleidle");
-                        queue.shift();
-                        if (queue.length > 0) {
-                            var audio_resource = createAudioResource(`./music/${queue[0]}fd.mp3`);
-                            player.play(audio_resource);
-                        }
-                        else {
-                            if (player) { player.stop(); };
-                            if (connection) { connection.destroy(); };
-                        }
-                    })
-                }
-                catch (e) {
-                    console.log(e.message);
-                    interaction.reply(e.message);
-                }
-            }
-            else {
-                try {
-                    const video_data = await get_video(input); // todo: throw error and catch here if video not found / cannot be downloaded
-                    queue.push(input);
-                    interaction.reply(`Added \`${video_data.title} by ${video_data.owner}\` to queue!`);
-                }
-                catch (e) {
-                    interaction.reply(e.message);
-                }
-
-            }
-
-
-
-            // const audio_resource = createAudioResource(`./${queue[0]}.mp3`, {
-            //     metadata: {
-            //         title: "amongus",
-            //     }
-            // });
-            // player.play(audio_resource);
-        }
-        else {
-            interaction.reply("please use valid BVID")
-        }
-    }
-
-    if (interaction.commandName === "bstop") {
-        const connection = getVoiceConnection(interaction.guild.id);
-        connection.disconnect();
-        interaction.reply("Cleared the queue and disconnected the bot!")
-    }
-
-    if (interaction.commandName === "bskip") {
-        queue.shift();
-        if (queue.length > 0) {
-            var audio_resource = createAudioResource(`./music/${queue[0]}fd.mp3`);
-            player.play(audio_resource);
-            interaction.reply("Skipped.");
-        }
-        else {
-            const connection = getVoiceConnection(interaction.guild.id);
-            connection.disconnect();
-            interaction.reply("Skipped last in the queue, now disconnecting the bot...")
-        }
-    }
+	try {
+		await command.execute(interaction);
+	} catch (error) {
+		console.error(error);
+	}
 })
 
 // Log in to Discord with your client's token

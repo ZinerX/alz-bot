@@ -3,7 +3,7 @@ const ffmpeg = require('fluent-ffmpeg');
 ffmpeg.setFfmpegPath(ffmpegPath);
 
 const loudnorm = (audio) => {
-    ffmpeg(`./music/${audio}.mp3`).outputOptions(['-af', 'loudnorm=I=-30,volume=0.2']).save(`./music/${audio}fd.mp3`);
+    ffmpeg(`./music/${audio}.m4a`).outputOptions(['-af', 'loudnorm=I=-30,volume=0.2']).save(`./music/${audio}fd.m4a`);
 }
 
 module.exports = {loudnorm};
