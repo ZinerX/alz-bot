@@ -16,18 +16,13 @@ module.exports = {
 			interaction.reply("You need to be in a voice channel to use this command!");
 			return;
 		}
-		const input = interaction.options.get('link')['value'];
+		console.log(interaction.options.get('bvid'));
+		const input = interaction.options.get('bvid')["value"];
 		await interaction.deferReply({ ephemeral: true });
 		if (queue.length === 0) { // if queue is fresh then init connection and player and subcribe to state changes
 			try {
 				const video_data = await get_videov2(input); // todo: throw error and catch here if video not found / cannot be downloaded
 				queue.push(video_data.id);
-
-				const sleep = ms => new Promise(r => setTimeout(r, ms));
-				await sleep(1000);
-				// console.log("downloaders");
-				// console.log(interaction.member.voice.channelId);
-				// console.log(interaction.guild.id);
 				const connection = joinVoiceChannel({
 					channelId: interaction.member.voice.channelId,
 					guildId: interaction.guild.id,
@@ -36,10 +31,11 @@ module.exports = {
 				player = createAudioPlayer();
 				var subscription;
 
-				connection.on(VoiceConnectionStatus.Ready, () => {
+				connection.on(VoiceConnectionStatus.Ready, async () => {
 					// console.log('Connection is in the Ready state!');
 					subscription = connection.subscribe(player);
-					let audio_resource = createAudioResource(`./music/${queue[0]}.m4a`);
+					
+					let audio_resource = createAudioResource(`./music/${queue[0]}fd.m4a`);
 					player.play(audio_resource);
 					interaction.editReply(`Now Playing \`${video_data.title} by ${video_data.uploader}\``);
 				});
@@ -50,7 +46,7 @@ module.exports = {
 					player.stop();
 					subscription.unsubscribe();
 					connection.destroy();
-					queue = [];
+					queue.length = 0;
 					return;
 				});
 				// console.log(queue.length);
@@ -60,10 +56,9 @@ module.exports = {
 				});
 
 				player.on(AudioPlayerStatus.Idle, () => {
-					// console.log("idleidleidleidleidle");
 					queue.shift();
 					if (queue.length > 0) {
-						var audio_resource = createAudioResource(`./music/${queue[0]}.m4a`);
+						var audio_resource = createAudioResource(`./music/${queue[0]}fd.m4a`);
 						player.play(audio_resource);
 					}
 					else {
@@ -88,15 +83,6 @@ module.exports = {
 			}
 
 		}
-
-
-
-		// const audio_resource = createAudioResource(`./${queue[0]}.mp3`, {
-		//     metadata: {
-		//         title: "amongus",
-		//     }
-		// });
-		// player.play(audio_resource);
 	}
 
 };
