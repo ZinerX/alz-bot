@@ -1,26 +1,37 @@
-const { queue } = require('../../utils/common.js');
-const { SlashCommandBuilder } = require('discord.js');
-const { createAudioResource, getVoiceConnection } = require('@discordjs/voice');
+import { queue } from '../../utils/common.js';
+import { SlashCommandBuilder } from 'discord.js';
+import { getVoiceConnection } from '@discordjs/voice';
+import { playerStore } from '../../utils/playerStore.js';
 
-module.exports = {
-    data: new SlashCommandBuilder()
-        .setName('bskip')
-        .setDescription('skip to the next track in the queue'),
-    async execute(interaction) {
-        if (interaction.member.voice.channelId === null) {
-            interaction.reply("You need to be in a voice channel to use this command!");
-            return;
-        }
-        queue.shift();
-        if (queue.length > 0) {
-            var audio_resource = createAudioResource(`./music/${queue[0].id}fd.mp3`);
-            player.play(audio_resource);
-            interaction.reply("Skipped.");
-        }
-        else {
-            const connection = getVoiceConnection(interaction.guild.id);
-            connection.disconnect();
-            interaction.reply("Skipped last in the queue, now disconnecting the bot...")
-        }
+export const data = new SlashCommandBuilder()
+    .setName('bskip')
+    .setDescription('skip to the next track in the queue');
+
+export async function execute(interaction) {
+    if (!interaction.member.voice.channelId) {
+        await interaction.reply("You need to be in a voice channel to use this command!");
+        return;
     }
+
+    const connection = getVoiceConnection(interaction.guild.id);
+    if (!connection) {
+        await interaction.reply("The bot is not in a voice channel.");
+        return;
+    }
+
+    const guildPlayer = playerStore.get(interaction.guild.id);
+    if (!guildPlayer) {
+        await interaction.reply("The bot is not playing anything or the player is not initialized.");
+        return;
+    }
+
+    if (queue.length === 0) {
+        await interaction.reply("The queue is empty, nothing to skip.");
+        return;
+    }
+
+
+    guildPlayer.stop(); 
+
+    await interaction.reply("Skipped to the next track (if one exists).");
 }

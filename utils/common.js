@@ -1,3 +1,12 @@
-let queue = [];
+export let queue = [];
 
-module.exports = {queue};
+export const fetchWorldState = async () => { 
+    const response = await fetch('https://content.warframe.com/dynamic/worldState.php', {
+        method: "GET",
+    });
+    if (!response.ok) { 
+        throw new Error(`Failed to fetch world state: ${response.status} ${response.statusText}`);
+    }
+    const worldState = await response.json();
+    return worldState;
+}
