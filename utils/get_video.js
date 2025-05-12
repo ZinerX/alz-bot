@@ -1,6 +1,6 @@
 const youtubedl = require('youtube-dl-exec')
 
-const get_videov2 = async (link) => {
+const get_video = async (link) => {
     const videoData = await youtubedl(link, { 
         dumpSingleJson: true,
         noWarnings: true, 
@@ -27,4 +27,4 @@ const get_videov2 = async (link) => {
     return videoInfo;
 }
 
-module.exports = { get_videov2 }
+module.exports = { get_video }

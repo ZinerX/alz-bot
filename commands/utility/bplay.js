@@ -1,7 +1,7 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { joinVoiceChannel, createAudioPlayer, AudioPlayerStatus, createAudioResource, VoiceConnectionStatus, getVoiceConnection } = require('@discordjs/voice');
 const { queue } = require('../../utils/common.js');
-const { get_videov2 } = require('../../get_videov2.js')
+const { get_video } = require('../../utils/get_video.js')
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -21,7 +21,7 @@ module.exports = {
 		await interaction.deferReply({ ephemeral: true });
 		if (queue.length === 0) { // if queue is fresh then init connection and player and subcribe to state changes
 			try {
-				const video_data = await get_videov2(input); // todo: throw error and catch here if video not found / cannot be downloaded
+				const video_data = await get_video(input); // todo: throw error and catch here if video not found / cannot be downloaded
 				queue.push(video_data);
 				const connection = joinVoiceChannel({
 					channelId: interaction.member.voice.channelId,
@@ -74,7 +74,7 @@ module.exports = {
 		}
 		else {
 			try {
-				const video_data = await get_videov2(input); // todo: throw error and catch here if video not found / cannot be downloaded
+				const video_data = await get_video(input); // todo: throw error and catch here if video not found / cannot be downloaded
 				queue.push(video_data);
 				interaction.editReply(`Added \`${video_data.title} by ${video_data.uploader}\` to queue!`);
 			}
