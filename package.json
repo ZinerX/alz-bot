@@ -4,7 +4,8 @@
   "description": "you play bilibili music with this shii",
   "main": "index.js",
   "scripts": {
-    "test": "node ./index.js"
+    "test": "node ./index.js",
+    "start": "node ./deploy.js && node ./index.js"
   },
   "repository": {
     "type": "git",

@@ -16,13 +16,13 @@ module.exports = {
 			interaction.reply("You need to be in a voice channel to use this command!");
 			return;
 		}
-		console.log(interaction.options.get('bvid'));
-		const input = interaction.options.get('bvid')["value"];
+		console.log(interaction.options.get('link'));
+		const input = interaction.options.get('link')["value"];
 		await interaction.deferReply({ ephemeral: true });
 		if (queue.length === 0) { // if queue is fresh then init connection and player and subcribe to state changes
 			try {
 				const video_data = await get_videov2(input); // todo: throw error and catch here if video not found / cannot be downloaded
-				queue.push(video_data.id);
+				queue.push(video_data);
 				const connection = joinVoiceChannel({
 					channelId: interaction.member.voice.channelId,
 					guildId: interaction.guild.id,
@@ -35,7 +35,7 @@ module.exports = {
 					// console.log('Connection is in the Ready state!');
 					subscription = connection.subscribe(player);
 					
-					let audio_resource = createAudioResource(`./music/${queue[0]}fd.m4a`);
+					let audio_resource = createAudioResource(`./music/${queue[0].id}fd.m4a`);
 					player.play(audio_resource);
 					interaction.editReply(`Now Playing \`${video_data.title} by ${video_data.uploader}\``);
 				});
@@ -58,7 +58,7 @@ module.exports = {
 				player.on(AudioPlayerStatus.Idle, () => {
 					queue.shift();
 					if (queue.length > 0) {
-						var audio_resource = createAudioResource(`./music/${queue[0]}fd.m4a`);
+						var audio_resource = createAudioResource(`./music/${queue[0].id}fd.m4a`);
 						player.play(audio_resource);
 					}
 					else {
@@ -75,7 +75,7 @@ module.exports = {
 		else {
 			try {
 				const video_data = await get_videov2(input); // todo: throw error and catch here if video not found / cannot be downloaded
-				queue.push(input);
+				queue.push(video_data);
 				interaction.editReply(`Added \`${video_data.title} by ${video_data.uploader}\` to queue!`);
 			}
 			catch (e) {

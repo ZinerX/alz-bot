@@ -57,8 +57,6 @@ const clearOrCreateMusicFolder = () => {
     }
 }
 
-var queue = [];
-var player;
 // When the client is ready, run this code (only once).
 // The distinction between `client: Client<boolean>` and `readyClient: Client<true>` is important for TypeScript developers.
 // It makes some properties non-nullable.
@@ -68,27 +66,6 @@ client.once(Events.ClientReady, readyClient => {
 
 client.on('interactionCreate', async (interaction) => {
     if (!interaction.isChatInputCommand()) return;
-
-    // if (interaction.commandName === "bstop") {
-    //     const connection = getVoiceConnection(interaction.guild.id);
-    //     connection.disconnect();
-    //     interaction.reply("Cleared the queue and disconnected the bot!")
-    // }
-
-    // if (interaction.commandName === "bskip") {
-    //     queue.shift();
-    //     if (queue.length > 0) {
-    //         var audio_resource = createAudioResource(`./music/${queue[0]}fd.mp3`);
-    //         player.play(audio_resource);
-    //         interaction.reply("Skipped.");
-    //     }
-    //     else {
-    //         const connection = getVoiceConnection(interaction.guild.id);
-    //         connection.disconnect();
-    //         interaction.reply("Skipped last in the queue, now disconnecting the bot...")
-    //     }
-    // }
-
     const command = interaction.client.commands.get(interaction.commandName);
     if (!command) {
 		console.error(`No command matching ${interaction.commandName} was found.`);

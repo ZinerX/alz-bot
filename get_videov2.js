@@ -1,19 +1,29 @@
 const youtubedl = require('youtube-dl-exec')
 
 const get_videov2 = async (link) => {
-    const output = await youtubedl(link, {
+    const videoData = await youtubedl(link, { 
+        dumpSingleJson: true,
+        noWarnings: true, 
+    });
+
+    const videoId = videoData.id;
+    const videoTitle = videoData.title;
+    const videoUploader = videoData.uploader || videoData.channel || 'Unknown Uploader';
+    await youtubedl(link, {
         format: "bestaudio",
-        output: "%(id)s.m4a",
-        paths: "./music",
-        print: "%(id)s-|::|-%(title)s-|::|-%(uploader)s",
+        extractAudio: true,
+        audioFormat: "m4a",
+        output: `${videoId}fd.m4a`, 
+        paths: "./music", 
         noSimulate: true,
-        exec: "ffmpeg -i ./music/%(id)s.m4a -af loudnorm=I=-30,volume=0.2 ./music/%(id)sfd.m4a -y",
-    })
-    const splitted = output.split("-|::|-");
-    const videoInfo = {};
-    videoInfo.id = splitted[0];
-    videoInfo.title = splitted[1];
-    videoInfo.uploader = splitted[2];
+        postprocessorArgs: "-af loudnorm=I=-30:linear=true,volume=0.2",
+    });
+
+    const videoInfo = {
+        id: videoId,
+        title: videoTitle,
+        uploader: videoUploader,
+    };
     return videoInfo;
 }
 
