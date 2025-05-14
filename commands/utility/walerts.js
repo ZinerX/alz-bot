@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { fetchWorldState } from '../../utils/common.js';
 import Items from '@wfcd/items';
 import worldStateData from 'warframe-worldstate-data';
@@ -15,7 +15,7 @@ export async function execute(interaction) {
     
     if (!ws.Alerts || ws.Alerts.length === 0) {
         replyString += "No active alerts at the moment.";
-        await interaction.reply(replyString);
+        await interaction.reply({content: replyString, flags: MessageFlags.Ephemeral});
         return;
     }
 
@@ -46,5 +46,5 @@ export async function execute(interaction) {
         alertString += `**Rewards:** ${rewards.join(', ')}\n\n`;
         replyString += alertString;
     }
-    await interaction.reply(replyString);
+    await interaction.reply({content: replyString, flags: MessageFlags.Ephemeral});
 }
