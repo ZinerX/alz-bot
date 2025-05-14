@@ -40,11 +40,11 @@ const rest = new REST().setToken(process.env.token);
         console.log(`Started refreshing ${commands.length} application (/) commands.`);
 
         const data = await rest.put(
-            Routes.applicationGuildCommands(process.env.cid, process.env.gid),
+            Routes.applicationCommands(process.env.cid),
             { body: commands },
         );
 
-        console.log(`Successfully reloaded ${data.length} application (/) commands.`);
+        console.log(`Successfully reloaded ${data.length} application (/) commands globally.`);
     } catch (error) {
         console.error("Error in deploy.js:", error);
     }

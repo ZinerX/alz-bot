@@ -1,7 +1,7 @@
 {
-  "name": "bmusicbot",
+  "name": "alz-bot",
   "version": "1.0.0",
-  "description": "you play bilibili music with this shii",
+  "description": "you play music, fetch warframe world states with this",
   "main": "index.js",
   "scripts": {
     "test": "node ./index.js",
@@ -9,27 +9,23 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ZinerX/bilimusicbot.git"
+    "url": "git+https://github.com/ZinerX/alz-bot.git"
   },
   "author": "ZinerX",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/ZinerX/bilimusicbot/issues"
+    "url": "https://github.com/ZinerX/alz-bot/issues"
   },
-  "homepage": "https://github.com/ZinerX/bilimusicbot#readme",
+  "homepage": "https://github.com/ZinerX/alz-bot",
   "dependencies": {
     "@discordjs/opus": "^0.10.0",
     "@discordjs/voice": "^0.18.0",
-    "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@wfcd/items": "^1.1270.195",
     "discord.js": "^14.17.3",
     "dotenv": "^16.4.7",
     "ffmpeg-static": "^5.2.0",
-    "fluent-ffmpeg": "^2.1.3",
-    "progress-estimator": "^0.3.1",
     "warframe-worldstate-data": "^2.24.8",
-    "youtube-dl-exec": "^3.0.16",
-    "yt-dlp-wrap": "^2.3.12"
+    "youtube-dl-exec": "^3.0.16"
   },
   "type": "module"
 }
