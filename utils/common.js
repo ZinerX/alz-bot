@@ -1,6 +1,7 @@
 import OpenAI from 'openai';
 
 export let queue = [];
+export let reminderList = [];
 export let openai = null;
 
 if (process.env.OPENAI_API_KEY) {
