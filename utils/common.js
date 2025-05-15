@@ -1,4 +1,13 @@
+import OpenAI from 'openai';
+
 export let queue = [];
+export let openai = null;
+
+if (process.env.OPENAI_API_KEY) {
+    openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+    });
+}
 
 export const fetchWorldState = async () => { 
     const response = await fetch('https://content.warframe.com/dynamic/worldState.php', {
