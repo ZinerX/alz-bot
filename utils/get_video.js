@@ -1,25 +1,23 @@
 import youtubedl from 'youtube-dl-exec';
-import pathToFfmpeg from 'ffmpeg-static';
+import ffmpegPath from 'ffmpeg-static';
 
 export const get_video = async (link) => {
+    
     const videoData = await youtubedl(link, {
         dumpSingleJson: true,
         noWarnings: true,
-        ffmpegLocation: pathToFfmpeg,
     });
 
     const videoId = videoData.id;
     const videoTitle = videoData.title;
     const videoUploader = videoData.uploader || videoData.channel || 'Unknown Uploader';
+    
     await youtubedl(link, {
         format: "bestaudio",
-        extractAudio: true,
-        audioFormat: "m4a",
-        output: `${videoId}fd.m4a`,
+        output: "%(id)s.m4a",
         paths: "./music",
         noSimulate: true,
-        postprocessorArgs: "-af loudnorm=I=-30:linear=true,volume=0.2",
-        ffmpegLocation: pathToFfmpeg,
+        exec: `"${ffmpegPath}" -i ./music/%(id)s.m4a -af loudnorm=I=-30,volume=0.3 ./music/%(id)sfd.m4a -y`,
     });
 
     const videoInfo = {
